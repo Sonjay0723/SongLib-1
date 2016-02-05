@@ -1,3 +1,8 @@
+/*
+ * Song.java
+ * Elbert Basolis (egb37)
+ * Alex Rossi (aer112)
+ */
 package songlib.view;
 
 public class Song {

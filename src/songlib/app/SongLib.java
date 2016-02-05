@@ -1,3 +1,9 @@
+/*
+ * SongLib.java
+ * Elbert Basolis (egb37)
+ * Alex Rossi (aer112)
+ */
+
 package songlib.app;
 
 import javafx.application.Application;
