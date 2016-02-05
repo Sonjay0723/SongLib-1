@@ -1,11 +1,10 @@
-<!--
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
 	Library.fxml
 	Elbert Basolis (egb37)
-	Alex Rossi (aer112)
--->
-
-
-<?xml version="1.0" encoding="UTF-8"?>
+    Alex Rossi (aer112)
+ -->
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
