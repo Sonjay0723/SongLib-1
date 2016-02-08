@@ -146,20 +146,45 @@ public class LibraryController implements Initializable {
 	
 		//Check for redundant song/artist combo
 		for(Song s : songs){
-			if(s.getName().equals(detailName.getText()) && s.getArtist().equals(detailArtist.getText())){
-				detailWarning.setText("Song from that artist exists! Try another.");
+			if(s.getAlbum().equals(detailAlbum.getText()) && s.getYear().equals(detailYear.getText()) && s.getName().equals(detailName.getText()) && s.getArtist().equals(detailArtist.getText())){
+				detailWarning.setText("Duplicate! Try another.");
 				detailWarning.setOpacity(1);
 				return;
 			}
 			detailWarning.setOpacity(0);
 		}
 
-		Song s = songList.getSelectionModel().getSelectedItem();
+		//Added from here **********************************************
+		String tempName, tempArtist, tempAlbum, tempYear;
+		tempName = detailName.getText();
+		tempArtist = detailArtist.getText();
+		tempAlbum = detailAlbum.getText();
+		tempYear = detailYear.getText();
 		
-		s.setName(detailName.getText());
-		s.setArtist(detailArtist.getText());
-		s.setAlbum(detailAlbum.getText());
-		s.setYear(detailYear.getText());
+		
+		Song s = songList.getSelectionModel().getSelectedItem();
+		songs.remove(s);
+		
+		
+		
+		//Add that bad boy
+		Song newSong = new Song(tempName, tempArtist);
+		newSong.setAlbum(tempAlbum);
+		newSong.setYear(tempYear);
+		
+		songs.add(newSong);
+		
+		songList.getSelectionModel().select(newSong);
+		//to here*********************************************************
+		//Clear add fields
+		addName.setText("");
+		addArtist.setText("");
+		addAlbum.setText("");
+		addYear.setText("");
+		
+		//Don't forget to sort this
+		
+	
 		
 		//DONT FORGET TO SORT
 		
