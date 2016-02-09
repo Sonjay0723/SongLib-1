@@ -11,6 +11,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import java.io.*;
+import java.io.File;
 
 public class SongLib extends Application {
 
@@ -24,10 +26,12 @@ public class SongLib extends Application {
 		primaryStage.setTitle("Song Library");
 		primaryStage.setResizable(false);  
 		primaryStage.show();
+
 	}
 
 	public static void main(String[] args) {
 		launch(args);
+
 	}
 
 }
