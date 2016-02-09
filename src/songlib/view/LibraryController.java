@@ -8,6 +8,8 @@ package songlib.view;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.io.*;
+import java.io.File;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,27 +44,70 @@ public class LibraryController implements Initializable {
 	
 	@FXML private Label addWarning;
 	@FXML private Label detailWarning;
+	boolean newLib;  //used to check if the instance being run creates a new library or loads a library
 	
-	final ObservableList<Song> songs = FXCollections.observableArrayList();
+	ObservableList<Song> songs = FXCollections.observableArrayList();
 	
 	/*
 	 * TODO:
-	 * Make ObservableList reflect changes from save (Changing song will not show up on left)
+	 * DONE Make ObservableList reflect changes from save (Changing song will not show up on left)
 	 * Sort on edit/add
-	 * Figure out persistance and loading from file?
-	 * Do we have to change errors to a popup dialauge?
+	 * DONE(maybe) Figure out persistence and loading from file?
+	 * Do we have to change errors to a popup dialog?
 	 * Select next song if current is deleted, previous if no next
 	 */
 	
 	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		newLib = true;
+		try{
+			File f = new File("C:/Users/Alexr0/Documents/lib.ser");
+			if(!f.exists()){
+				f.createNewFile();
+				//System.out.println("file created");
+			}else{
+				newLib = false;
+			}
+		}catch(Exception m){
+			//System.out.println("the error is here");
+		}
+		System.out.println("test");
+		
+		//reads existing file and puts it into this song library if the file exists
+		if(newLib == false){
+			System.out.println("test2");
+			try{
+				FileInputStream fileIn = new FileInputStream("C:/Users/Alexr0/Documents/lib.ser");
+				ObjectInputStream in = new ObjectInputStream(fileIn);
+				System.out.println("test2");
+				try{
+					while(true){
+						//System.out.println("huh?");
+						Song temp = (Song)in.readObject();
+						songs.add(temp);
+					}
+				}catch(EOFException e){
+					System.out.println("Songlist successfully loaded");
+				}
+				in.close();
+				fileIn.close();
+			}catch(IOException i){
+				i.printStackTrace();
+				return;
+			}catch(ClassNotFoundException c){
+				System.out.println("Not found");
+				c.printStackTrace();
+				return;
+			}
+		}
+	
 		songList.setItems(songs);
 		
-		//Pull details from persistant storage
+		//Pull details from persistent storage
 		//If it does that, select top
-		
-		//Listner for change of selection
+		//huh
+		//Listener for change of selection
 		songList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Song>(){
 			public void changed(ObservableValue<? extends Song> ov, 
                     Song old_val, Song new_val) {
@@ -121,6 +166,9 @@ public class LibraryController implements Initializable {
 		addYear.setText("");
 		
 		//Don't forget to sort this
+	
+			serialize();
+		
 	}
 	
 	@FXML
@@ -132,6 +180,8 @@ public class LibraryController implements Initializable {
 		songs.remove(s);
 		
 		//Shouldn't have to sort???
+		
+		serialize();
 	}
 	
 	@FXML
@@ -187,8 +237,22 @@ public class LibraryController implements Initializable {
 	
 		
 		//DONT FORGET TO SORT
-		
+		serialize();
 
 	}
 	
+	private void serialize(){
+		try{
+			FileOutputStream fileOut = new FileOutputStream("C:/Users/Alexr0/Documents/lib.ser");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			for(Song s : songs){
+				out.writeObject(s);
+			}
+			out.close();
+			fileOut.close();
+			System.out.println("Serialized data is saved in ");
+		}catch(IOException i){
+			i.printStackTrace();
+		}
+	}
 }
