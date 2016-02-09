@@ -52,22 +52,38 @@ public class LibraryController implements Initializable {
 	 * TODO:
 	 * DONE Make ObservableList reflect changes from save (Changing song will not show up on left)
 	 * Sort on edit/add
-	 * DONE(maybe) Figure out persistence and loading from file?
+	 * DONE Figure out persistence and loading from file?
 	 * Do we have to change errors to a popup dialog?
 	 * Select next song if current is deleted, previous if no next
+	 * Change the path of the file to be read/written to
+	 * Restrict Save/Delete to only work if a song is selected
 	 */
 	
 	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		newLib = true;
+
 		try{
+			//**********************NEEDS TO BE CHANGED
 			File f = new File("C:/Users/Alexr0/Documents/lib.ser");
 			if(!f.exists()){
 				f.createNewFile();
 				//System.out.println("file created");
 			}else{
-				newLib = false;
+				
+				//checks if the file is empty
+				try{
+					//*****************************NEEDS TO BE CHANGED
+					BufferedReader br = new BufferedReader(new FileReader("C:/Users/Alexr0/Documents/lib.ser"));
+					if( br.readLine() == null){
+						newLib = true;
+					}else{
+						newLib = false;
+					}
+				}catch(FileNotFoundException nf){
+					System.out.println("File not found");
+				}
 			}
 		}catch(Exception m){
 			//System.out.println("the error is here");
@@ -78,6 +94,7 @@ public class LibraryController implements Initializable {
 		if(newLib == false){
 			System.out.println("test2");
 			try{
+				//*****************************NEEDS TO BE CHANGED
 				FileInputStream fileIn = new FileInputStream("C:/Users/Alexr0/Documents/lib.ser");
 				ObjectInputStream in = new ObjectInputStream(fileIn);
 				System.out.println("test2");
@@ -89,9 +106,10 @@ public class LibraryController implements Initializable {
 					}
 				}catch(EOFException e){
 					System.out.println("Songlist successfully loaded");
+					in.close();
+					fileIn.close();
 				}
-				in.close();
-				fileIn.close();
+				
 			}catch(IOException i){
 				i.printStackTrace();
 				return;
@@ -243,6 +261,7 @@ public class LibraryController implements Initializable {
 	
 	private void serialize(){
 		try{
+			//***************************NEEDS TO BE CHANGED
 			FileOutputStream fileOut = new FileOutputStream("C:/Users/Alexr0/Documents/lib.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			for(Song s : songs){
