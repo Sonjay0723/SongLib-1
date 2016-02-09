@@ -137,10 +137,10 @@ public class LibraryController implements Initializable {
                     detailAlbum.setText("");
                     detailYear.setText("");
 				}else{
-                    detailName.setText(new_val.name);
-                    detailArtist.setText(new_val.artist);
-                    detailAlbum.setText(new_val.album);
-                    detailYear.setText(new_val.year);
+                    detailName.setText(new_val.name.trim());
+                    detailArtist.setText(new_val.artist.trim());
+                    detailAlbum.setText(new_val.album.trim());
+                    detailYear.setText(new_val.year.trim());
 				}
 			}
 		});
@@ -161,7 +161,7 @@ public class LibraryController implements Initializable {
 		
 		//Check for redundant song/artist combo
 		for(Song s : songs){
-			if(s.getName().equals(addName.getText()) && s.getArtist().equals(addArtist.getText())){
+			if(s.getName().equals(addName.getText().trim()) && s.getArtist().equals(addArtist.getText().trim())){
 				addWarning.setText("Song from that artist exists! Try another.");
 				addWarning.setOpacity(1);
 				return;
@@ -170,9 +170,9 @@ public class LibraryController implements Initializable {
 		}
 		
 		//Add that bad boy
-		Song newSong = new Song(addName.getText(), addArtist.getText());
-		newSong.setAlbum(addAlbum.getText());
-		newSong.setYear(addYear.getText());
+		Song newSong = new Song(addName.getText().trim(), addArtist.getText().trim());
+		newSong.setAlbum(addAlbum.getText().trim());
+		newSong.setYear(addYear.getText().trim());
 		
 		songs.add(newSong);
 		
@@ -216,7 +216,8 @@ public class LibraryController implements Initializable {
 	
 		//Check for redundant song/artist combo
 		for(Song s : songs){
-			if(s.getAlbum().equals(detailAlbum.getText()) && s.getYear().equals(detailYear.getText()) && s.getName().equals(detailName.getText()) && s.getArtist().equals(detailArtist.getText())){
+			if(/*s.getAlbum().equals(detailAlbum.getText().trim()) && s.getYear().equals(detailYear.getText().trim()) && */
+				s.getName().equals(detailName.getText().trim()) && s.getArtist().equals(detailArtist.getText().trim())){
 				detailWarning.setText("Duplicate! Try another.");
 				detailWarning.setOpacity(1);
 				return;
@@ -227,10 +228,10 @@ public class LibraryController implements Initializable {
 		//Added from here **********************************************
 
 		String tempName, tempArtist, tempAlbum, tempYear;
-		tempName = detailName.getText();
-		tempArtist = detailArtist.getText();
-		tempAlbum = detailAlbum.getText();
-		tempYear = detailYear.getText();
+		tempName = detailName.getText().trim();
+		tempArtist = detailArtist.getText().trim();
+		tempAlbum = detailAlbum.getText().trim();
+		tempYear = detailYear.getText().trim();
 		
 		
 		Song s = songList.getSelectionModel().getSelectedItem();
