@@ -50,6 +50,7 @@ public class LibraryController implements Initializable {
 	
 	/*
 	 * TODO:
+	 * TEST
 	 * DONE Make ObservableList reflect changes from save (Changing song will not show up on left)
 	 * Sort on edit/add
 	 * DONE Figure out persistence and loading from file?
