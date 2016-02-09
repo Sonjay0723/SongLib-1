@@ -56,7 +56,7 @@ public class LibraryController implements Initializable {
 	 * Do we have to change errors to a popup dialog?
 	 * Select next song if current is deleted, previous if no next
 	 * Change the path of the file to be read/written to
-	 * Restrict Save/Delete to only work if a song is selected
+	 * DONE Restrict Save/Delete to only work if a song is selected
 	 */
 	
 	
@@ -194,12 +194,13 @@ public class LibraryController implements Initializable {
 		//Add logic
 		Song s = songList.getSelectionModel().getSelectedItem();
 		
-		
+		if(s != null){
 		songs.remove(s);
 		
 		//Shouldn't have to sort???
 		
 		serialize();
+		}
 	}
 	
 	@FXML
@@ -223,6 +224,7 @@ public class LibraryController implements Initializable {
 		}
 
 		//Added from here **********************************************
+
 		String tempName, tempArtist, tempAlbum, tempYear;
 		tempName = detailName.getText();
 		tempArtist = detailArtist.getText();
@@ -231,6 +233,7 @@ public class LibraryController implements Initializable {
 		
 		
 		Song s = songList.getSelectionModel().getSelectedItem();
+		if(s != null){
 		songs.remove(s);
 		
 		
@@ -250,13 +253,9 @@ public class LibraryController implements Initializable {
 		addAlbum.setText("");
 		addYear.setText("");
 		
-		//Don't forget to sort this
-		
-	
-		
 		//DONT FORGET TO SORT
 		serialize();
-
+		}
 	}
 	
 	private void serialize(){
