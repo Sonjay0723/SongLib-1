@@ -214,15 +214,22 @@ public class LibraryController implements Initializable {
 			detailWarning.setOpacity(0);
 		}
 	
+		
+		Song selectedSong = songList.getSelectionModel().getSelectedItem();
 		//Check for redundant song/artist combo
+
 		for(Song s : songs){
-			if(/*s.getAlbum().equals(detailAlbum.getText().trim()) && s.getYear().equals(detailYear.getText().trim()) && */
+			if(s != selectedSong){
+				if(/*s.getAlbum().equals(detailAlbum.getText().trim()) && s.getYear().equals(detailYear.getText().trim()) && */
 				s.getName().equals(detailName.getText().trim()) && s.getArtist().equals(detailArtist.getText().trim())){
-				detailWarning.setText("Duplicate! Try another.");
-				detailWarning.setOpacity(1);
-				return;
+	
+							detailWarning.setText("Duplicate! Try another.");
+							detailWarning.setOpacity(1);
+							return;
+						
+				}
+				detailWarning.setOpacity(0);
 			}
-			detailWarning.setOpacity(0);
 		}
 
 		//Added from here **********************************************
@@ -234,20 +241,25 @@ public class LibraryController implements Initializable {
 		tempYear = detailYear.getText().trim();
 		
 		
-		Song s = songList.getSelectionModel().getSelectedItem();
-		if(s != null){
-		songs.remove(s);
+		
+		if(selectedSong != null){
+			selectedSong.setAlbum(tempAlbum);
+			selectedSong.setArtist(tempArtist);
+			selectedSong.setName(tempName);
+			selectedSong.setYear(tempYear);
+		//songs.remove(selectedSong);
 		
 		
 		
 		//Add that bad boy
-		Song newSong = new Song(tempName, tempArtist);
-		newSong.setAlbum(tempAlbum);
-		newSong.setYear(tempYear);
+		//Song newSong = new Song(tempName, tempArtist);
+		//newSong.setAlbum(tempAlbum);
+		//newSong.setYear(tempYear);
+	
 		
-		songs.add(newSong);
+		//songs.add(newSong);
 		
-		songList.getSelectionModel().select(newSong);
+		songList.getSelectionModel().select(selectedSong);
 		//to here*********************************************************
 		//Clear add fields
 		addName.setText("");
