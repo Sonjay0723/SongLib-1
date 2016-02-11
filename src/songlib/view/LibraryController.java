@@ -67,7 +67,7 @@ public class LibraryController implements Initializable {
 
 		try{
 			//**********************NEEDS TO BE CHANGED
-			File f = new File("C:/Users/Alexr0/Documents/lib.ser");
+			File f = new File("lib.ser");
 			if(!f.exists()){
 				f.createNewFile();
 				//System.out.println("file created");
@@ -76,7 +76,7 @@ public class LibraryController implements Initializable {
 				//checks if the file is empty
 				try{
 					//*****************************NEEDS TO BE CHANGED
-					BufferedReader br = new BufferedReader(new FileReader("C:/Users/Alexr0/Documents/lib.ser"));
+					BufferedReader br = new BufferedReader(new FileReader("lib.ser"));
 					if( br.readLine() == null){
 						newLib = true;
 					}else{
@@ -96,7 +96,7 @@ public class LibraryController implements Initializable {
 			System.out.println("test2");
 			try{
 				//*****************************NEEDS TO BE CHANGED
-				FileInputStream fileIn = new FileInputStream("C:/Users/Alexr0/Documents/lib.ser");
+				FileInputStream fileIn = new FileInputStream("lib.ser");
 				ObjectInputStream in = new ObjectInputStream(fileIn);
 				System.out.println("test2");
 				try{
@@ -275,7 +275,7 @@ public class LibraryController implements Initializable {
 	private void serialize(){
 		try{
 			//***************************NEEDS TO BE CHANGED
-			FileOutputStream fileOut = new FileOutputStream("C:/Users/Alexr0/Documents/lib.ser");
+			FileOutputStream fileOut = new FileOutputStream("lib.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			for(Song s : songs){
 				out.writeObject(s);
