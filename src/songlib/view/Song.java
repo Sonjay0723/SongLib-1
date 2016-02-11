@@ -5,7 +5,9 @@
  */
 package songlib.view;
 
-public class Song {
+import java.io.Serializable;
+
+public class Song implements Comparable, Serializable{
 
 	String name;
 	String artist;
@@ -51,5 +53,12 @@ public class Song {
 	
 	public String toString(){
 		return this.name;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		String a = this.name;
+		String b = o.toString();
+		return a.compareToIgnoreCase(b);
 	}
 }

@@ -7,9 +7,11 @@
 package songlib.view;
 
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.io.*;
-import java.io.File;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -31,77 +33,85 @@ public class LibraryController implements Initializable {
 	@FXML private Button deleteSong;
 	@FXML private Button addSong;
 	@FXML private Button saveSong;
-	
+
 	@FXML private TextField addName;
 	@FXML private TextField addArtist;
 	@FXML private TextField addAlbum;
 	@FXML private TextField addYear;
-	
+
 	@FXML private TextField detailName;
 	@FXML private TextField detailArtist;
 	@FXML private TextField detailAlbum;
 	@FXML private TextField detailYear;
-	
+
 	@FXML private Label addWarning;
 	@FXML private Label detailWarning;
 	boolean newLib;  //used to check if the instance being run creates a new library or loads a library
-	
+
 	ObservableList<Song> songs = FXCollections.observableArrayList();
-	
+
 	/*
 	 * TODO:
 	 * TEST
-	 * DONE Make ObservableList reflect changes from save (Changing song will not show up on left)
-	 * Sort on edit/add
-	 * DONE Figure out persistence and loading from file?
 	 * Do we have to change errors to a popup dialog?
-	 * Select next song if current is deleted, previous if no next
-	 * Change the path of the file to be read/written to
-	 * DONE Restrict Save/Delete to only work if a song is selected
 	 */
-	
-	
+
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+
+		//Add Listeners
+		//Listener for change of selection
+		songList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Song>(){
+			public void changed(ObservableValue<? extends Song> ov, 
+					Song old_val, Song new_val) {
+
+				if(new_val == null){
+					detailName.setText("");
+					detailArtist.setText("");
+					detailAlbum.setText("");
+					detailYear.setText("");
+				}else{
+					detailName.setText(new_val.name.trim());
+					detailArtist.setText(new_val.artist.trim());
+					detailAlbum.setText(new_val.album.trim());
+					detailYear.setText(new_val.year.trim());
+				}
+			}
+		});
+
+		addFromFile();
+		songList.setItems(songs);
+
+	}
+
+	//Checks for library file
+	//Adds any songs found to 'songs' and allows initialize() to add them to the FX object
+	private void addFromFile() {
+
 		newLib = true;
 
 		try{
-			//**********************NEEDS TO BE CHANGED
 			File f = new File("lib.ser");
 			if(!f.exists()){
 				f.createNewFile();
-				//System.out.println("file created");
+				System.out.println("file created");
 			}else{
-				
-				//checks if the file is empty
-				try{
-					//*****************************NEEDS TO BE CHANGED
-					BufferedReader br = new BufferedReader(new FileReader("lib.ser"));
-					if( br.readLine() == null){
-						newLib = true;
-					}else{
-						newLib = false;
-					}
-				}catch(FileNotFoundException nf){
-					System.out.println("File not found");
-				}
+				newLib = false;
 			}
-		}catch(Exception m){
-			//System.out.println("the error is here");
+		}catch(IOException e){
+			System.out.println("Could not create file!");
+			e.printStackTrace();
 		}
-		System.out.println("test");
-		
+
 		//reads existing file and puts it into this song library if the file exists
 		if(newLib == false){
-			System.out.println("test2");
 			try{
-				//*****************************NEEDS TO BE CHANGED
 				FileInputStream fileIn = new FileInputStream("lib.ser");
 				ObjectInputStream in = new ObjectInputStream(fileIn);
-				System.out.println("test2");
+				System.out.println("found file");
 				try{
 					while(true){
-						//System.out.println("huh?");
 						Song temp = (Song)in.readObject();
 						songs.add(temp);
 					}
@@ -110,43 +120,27 @@ public class LibraryController implements Initializable {
 					in.close();
 					fileIn.close();
 				}
-				
-			}catch(IOException i){
-				i.printStackTrace();
-				return;
-			}catch(ClassNotFoundException c){
-				System.out.println("Not found");
-				c.printStackTrace();
-				return;
+			}catch(IOException | ClassNotFoundException c){
+				System.out.println("Corrupted file, overwriting this one.");
+				corruptedLibrary();
 			}
-		}
-	
-		songList.setItems(songs);
-		
-		//Pull details from persistent storage
-		//If it does that, select top
-		//huh
-		//Listener for change of selection
-		songList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Song>(){
-			public void changed(ObservableValue<? extends Song> ov, 
-                    Song old_val, Song new_val) {
-				
-				if(new_val == null){
-                    detailName.setText("");
-                    detailArtist.setText("");
-                    detailAlbum.setText("");
-                    detailYear.setText("");
-				}else{
-                    detailName.setText(new_val.name.trim());
-                    detailArtist.setText(new_val.artist.trim());
-                    detailAlbum.setText(new_val.album.trim());
-                    detailYear.setText(new_val.year.trim());
-				}
-			}
-		});
-		
+		}		
 	}
-	
+
+	//If addFromFile finds a corrupted/empty library, it does this.
+	private void corruptedLibrary() {
+		try {
+			Files.delete(Paths.get("lib.ser"));
+			File f = new File("lib.ser");
+			if(!f.exists()){
+				f.createNewFile();
+				System.out.println("New library created.");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@FXML
 	private void addSong(ActionEvent action){
 
@@ -158,7 +152,7 @@ public class LibraryController implements Initializable {
 		}else{
 			addWarning.setOpacity(0);
 		}
-		
+
 		//Check for redundant song/artist combo
 		for(Song s : songs){
 			if(s.getName().equals(addName.getText().trim()) && s.getArtist().equals(addArtist.getText().trim())){
@@ -168,42 +162,48 @@ public class LibraryController implements Initializable {
 			}
 			addWarning.setOpacity(0);
 		}
-		
+
 		//Add that bad boy
 		Song newSong = new Song(addName.getText().trim(), addArtist.getText().trim());
 		newSong.setAlbum(addAlbum.getText().trim());
 		newSong.setYear(addYear.getText().trim());
-		
+
 		songs.add(newSong);
-		
+
 		songList.getSelectionModel().select(newSong);
-		
+
 		//Clear add fields
 		addName.setText("");
 		addArtist.setText("");
 		addAlbum.setText("");
 		addYear.setText("");
-		
-		//Don't forget to sort this
-	
-			serialize();
-		
+
+		FXCollections.sort(songs);
+		serialize();
+
 	}
-	
+
 	@FXML
 	private void deleteSong(ActionEvent action){
 		//Add logic
 		Song s = songList.getSelectionModel().getSelectedItem();
-		
+
 		if(s != null){
-		songs.remove(s);
-		
-		//Shouldn't have to sort???
-		
-		serialize();
+
+			int nextIndex = songList.getSelectionModel().getSelectedIndex() + 1;
+			
+			//Selected song is not the last one
+			if(nextIndex != songs.size()){
+				songList.getSelectionModel().select(nextIndex);
+			}
+			
+			songs.remove(s);
+
+			FXCollections.sort(songs);
+			serialize();
 		}
 	}
-	
+
 	@FXML
 	private void saveSong(ActionEvent action){
 		if("".equals(detailName.getText()) || "".equals(detailArtist.getText())){
@@ -213,20 +213,20 @@ public class LibraryController implements Initializable {
 		}else{
 			detailWarning.setOpacity(0);
 		}
-	
-		
+
+
 		Song selectedSong = songList.getSelectionModel().getSelectedItem();
 		//Check for redundant song/artist combo
 
 		for(Song s : songs){
 			if(s != selectedSong){
 				if(/*s.getAlbum().equals(detailAlbum.getText().trim()) && s.getYear().equals(detailYear.getText().trim()) && */
-				s.getName().equals(detailName.getText().trim()) && s.getArtist().equals(detailArtist.getText().trim())){
-	
-							detailWarning.setText("Duplicate! Try another.");
-							detailWarning.setOpacity(1);
-							return;
-						
+						s.getName().equals(detailName.getText().trim()) && s.getArtist().equals(detailArtist.getText().trim())){
+
+					detailWarning.setText("Duplicate! Try another.");
+					detailWarning.setOpacity(1);
+					return;
+					
 				}
 				detailWarning.setOpacity(0);
 			}
@@ -239,39 +239,40 @@ public class LibraryController implements Initializable {
 		tempArtist = detailArtist.getText().trim();
 		tempAlbum = detailAlbum.getText().trim();
 		tempYear = detailYear.getText().trim();
-		
-		
-		
+
+
+
 		if(selectedSong != null){
 			selectedSong.setAlbum(tempAlbum);
 			selectedSong.setArtist(tempArtist);
 			selectedSong.setName(tempName);
 			selectedSong.setYear(tempYear);
-		//songs.remove(selectedSong);
-		
-		
-		
-		//Add that bad boy
-		//Song newSong = new Song(tempName, tempArtist);
-		//newSong.setAlbum(tempAlbum);
-		//newSong.setYear(tempYear);
-	
-		
-		//songs.add(newSong);
-		
-		songList.getSelectionModel().select(selectedSong);
-		//to here*********************************************************
-		//Clear add fields
-		addName.setText("");
-		addArtist.setText("");
-		addAlbum.setText("");
-		addYear.setText("");
-		
-		//DONT FORGET TO SORT
-		serialize();
+			//songs.remove(selectedSong);
+
+
+
+			//Add that bad boy
+			//Song newSong = new Song(tempName, tempArtist);
+			//newSong.setAlbum(tempAlbum);
+			//newSong.setYear(tempYear);
+
+
+			//songs.add(newSong);
+
+			songList.getSelectionModel().select(selectedSong);
+			//to here*********************************************************
+			//Clear add fields
+			addName.setText("");
+			addArtist.setText("");
+			addAlbum.setText("");
+			addYear.setText("");
+
+			//DONT FORGET TO SORT
+			FXCollections.sort(songs);
+			serialize();
 		}
 	}
-	
+
 	private void serialize(){
 		try{
 			//***************************NEEDS TO BE CHANGED
