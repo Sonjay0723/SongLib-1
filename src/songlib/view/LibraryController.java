@@ -80,6 +80,7 @@ public class LibraryController implements Initializable {
 
 		addFromFile();
 		songList.setItems(songs);
+		songList.getSelectionModel().selectFirst();
 
 	}
 
