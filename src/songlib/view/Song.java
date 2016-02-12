@@ -57,8 +57,9 @@ public class Song implements Comparable, Serializable{
 
 	@Override
 	public int compareTo(Object o) {
-		String a = this.name;
-		String b = o.toString();
+		String a = this.name + this.artist;
+		Song bs = (Song)o;
+		String b = bs.name+bs.artist;
 		return a.compareToIgnoreCase(b);
 	}
 }
