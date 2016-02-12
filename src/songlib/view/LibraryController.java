@@ -20,11 +20,16 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.FocusModel;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import java.util.Optional;
 
 
 public class LibraryController implements Initializable {
@@ -33,7 +38,7 @@ public class LibraryController implements Initializable {
 	@FXML private Button deleteSong;
 	@FXML private Button addSong;
 	@FXML private Button saveSong;
-
+	
 	@FXML private TextField addName;
 	@FXML private TextField addArtist;
 	@FXML private TextField addAlbum;
@@ -49,13 +54,6 @@ public class LibraryController implements Initializable {
 	boolean newLib;  //used to check if the instance being run creates a new library or loads a library
 
 	ObservableList<Song> songs = FXCollections.observableArrayList();
-
-	/*
-	 * TODO:
-	 * TEST
-	 * Do we have to change errors to a popup dialog?
-	 */
-
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -143,7 +141,7 @@ public class LibraryController implements Initializable {
 
 	@FXML
 	private void addSong(ActionEvent action){
-
+		
 		//Validate input, hide or show warning
 		if("".equals(addName.getText()) || "".equals(addArtist.getText())){
 			addWarning.setText("Song must have a name and artist! Try again.");
@@ -152,55 +150,78 @@ public class LibraryController implements Initializable {
 		}else{
 			addWarning.setOpacity(0);
 		}
-
+		
 		//Check for redundant song/artist combo
 		for(Song s : songs){
 			if(s.getName().equals(addName.getText().trim()) && s.getArtist().equals(addArtist.getText().trim())){
 				addWarning.setText("Song from that artist exists! Try another.");
 				addWarning.setOpacity(1);
+				addName.setText("");
+				addArtist.setText("");
+				addAlbum.setText("");
+				addYear.setText("");
 				return;
 			}
 			addWarning.setOpacity(0);
 		}
-
+	
 		//Add that bad boy
 		Song newSong = new Song(addName.getText().trim(), addArtist.getText().trim());
 		newSong.setAlbum(addAlbum.getText().trim());
 		newSong.setYear(addYear.getText().trim());
 
-		songs.add(newSong);
-
-		songList.getSelectionModel().select(newSong);
-
-		//Clear add fields
-		addName.setText("");
-		addArtist.setText("");
-		addAlbum.setText("");
-		addYear.setText("");
-
-		FXCollections.sort(songs);
-		serialize();
-
+		Alert confirm = new Alert(AlertType.CONFIRMATION);
+		confirm.setTitle("Add Song Confirmation");
+		confirm.setHeaderText("Are you sure that you want to add "+newSong.name+" by "+newSong.artist+"?");
+		confirm.setContentText("Are you really sure that you want to do this?");
+		
+		Optional<ButtonType> result = confirm.showAndWait();
+		if(result.get() == ButtonType.OK){
+			
+			songs.add(newSong);
+			songList.getSelectionModel().select(newSong);
+	
+			//Clear add fields
+			addName.setText("");
+			addArtist.setText("");
+			addAlbum.setText("");
+			addYear.setText("");
+	
+			FXCollections.sort(songs);
+			serialize();
+		}else{
+			addName.setText("");
+			addArtist.setText("");
+			addAlbum.setText("");
+			addYear.setText("");		
+		}
 	}
 
 	@FXML
 	private void deleteSong(ActionEvent action){
-		//Add logic
+		
 		Song s = songList.getSelectionModel().getSelectedItem();
 
-		if(s != null){
-
-			int nextIndex = songList.getSelectionModel().getSelectedIndex() + 1;
-			
-			//Selected song is not the last one
-			if(nextIndex != songs.size()){
-				songList.getSelectionModel().select(nextIndex);
+		Alert confirm = new Alert(AlertType.CONFIRMATION);
+		confirm.setTitle("Delete Confirmation");
+		confirm.setHeaderText("Are you sure that you want to delete "+s.name+" by "+s.artist+"?");
+		confirm.setContentText("Are you really sure that you want to do this?");
+		
+		Optional<ButtonType> result = confirm.showAndWait();
+		if(result.get() == ButtonType.OK){	
+			if(s != null){
+	
+				int nextIndex = songList.getSelectionModel().getSelectedIndex() + 1;
+				
+				//Selected song is not the last one
+				if(nextIndex != songs.size()){
+					songList.getSelectionModel().select(nextIndex);
+				}
+				
+				songs.remove(s);	
+				FXCollections.sort(songs);
+				serialize();
 			}
-			
-			songs.remove(s);
-
-			FXCollections.sort(songs);
-			serialize();
 		}
 	}
 
@@ -214,10 +235,8 @@ public class LibraryController implements Initializable {
 			detailWarning.setOpacity(0);
 		}
 
-
 		Song selectedSong = songList.getSelectionModel().getSelectedItem();
-		//Check for redundant song/artist combo
-
+		
 		for(Song s : songs){
 			if(s != selectedSong){
 				if(/*s.getAlbum().equals(detailAlbum.getText().trim()) && s.getYear().equals(detailYear.getText().trim()) && */
@@ -225,57 +244,52 @@ public class LibraryController implements Initializable {
 
 					detailWarning.setText("Duplicate! Try another.");
 					detailWarning.setOpacity(1);
+					detailName.setText("");
+					detailArtist.setText("");
+					detailAlbum.setText("");
+					detailYear.setText("");
 					return;
 					
 				}
 				detailWarning.setOpacity(0);
 			}
 		}
-
-		//Added from here **********************************************
-
-		String tempName, tempArtist, tempAlbum, tempYear;
-		tempName = detailName.getText().trim();
-		tempArtist = detailArtist.getText().trim();
-		tempAlbum = detailAlbum.getText().trim();
-		tempYear = detailYear.getText().trim();
-
-
-
-		if(selectedSong != null){
-			selectedSong.setAlbum(tempAlbum);
-			selectedSong.setArtist(tempArtist);
-			selectedSong.setName(tempName);
-			selectedSong.setYear(tempYear);
-			//songs.remove(selectedSong);
-
-
-
-			//Add that bad boy
-			//Song newSong = new Song(tempName, tempArtist);
-			//newSong.setAlbum(tempAlbum);
-			//newSong.setYear(tempYear);
-
-
-			//songs.add(newSong);
-
-			songList.getSelectionModel().select(selectedSong);
-			//to here*********************************************************
-			//Clear add fields
-			addName.setText("");
-			addArtist.setText("");
-			addAlbum.setText("");
-			addYear.setText("");
-
-			//DONT FORGET TO SORT
-			FXCollections.sort(songs);
-			serialize();
+	
+		//Check for redundant song/artist combo
+		Alert confirm = new Alert(AlertType.CONFIRMATION);
+		confirm.setTitle("Edit confirmatiion");
+		confirm.setHeaderText("Are you sure that you want to edit "+selectedSong.name+" by "+selectedSong.artist+"?");
+		confirm.setContentText("Are you really sure that you want to do this?");
+		
+		Optional<ButtonType> result = confirm.showAndWait();
+		if(result.get() == ButtonType.OK){
+	
+			String tempName, tempArtist, tempAlbum, tempYear;
+			tempName = detailName.getText().trim();
+			tempArtist = detailArtist.getText().trim();
+			tempAlbum = detailAlbum.getText().trim();
+			tempYear = detailYear.getText().trim();
+	
+			if(selectedSong != null){
+				selectedSong.setAlbum(tempAlbum);
+				selectedSong.setArtist(tempArtist);
+				selectedSong.setName(tempName);
+				selectedSong.setYear(tempYear);
+	
+				songList.getSelectionModel().select(selectedSong);
+				//Clear add fields
+				addName.setText("");
+				addArtist.setText("");
+				addAlbum.setText("");
+				addYear.setText("");
+				FXCollections.sort(songs);
+				serialize();
+			}
 		}
 	}
 
 	private void serialize(){
 		try{
-			//***************************NEEDS TO BE CHANGED
 			FileOutputStream fileOut = new FileOutputStream("lib.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			for(Song s : songs){
